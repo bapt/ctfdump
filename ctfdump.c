@@ -17,7 +17,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/exec_elf.h>
+#include <sys/elf.h>
 #include <sys/mman.h>
 #include <sys/ctf.h>
 
@@ -38,6 +38,13 @@
 #define nitems(_a)	(sizeof((_a)) / sizeof((_a)[0]))
 #endif
 
+#ifndef ELF_STRTAB
+#define ELF_STRTAB ".strtab"
+#endif
+#ifndef ELF_CTF
+#define ELF_CTF ".SUNW_ctf"
+#endif
+
 #define DUMP_OBJECT	(1 << 0)
 #define DUMP_FUNCTION	(1 << 1)
 #define DUMP_HEADER	(1 << 2)
@@ -48,7 +55,7 @@
 
 int		 dump(const char *, uint8_t);
 int		 isctf(const char *, size_t);
-__dead void	 usage(void);
+__dead2 void	 usage(void);
 
 int		 ctf_dump(const char *, size_t, uint8_t);
 uint32_t	 ctf_dump_type(struct ctf_header *, const char *, off_t,
@@ -227,7 +234,7 @@ int
 isctf(const char *p, size_t filesize)
 {
 	struct ctf_header	*cth = (struct ctf_header *)p;
-	off_t 			 dlen;
+	size_t 			 dlen;
 
 	if (filesize < sizeof(struct ctf_header)) {
 		warnx("file too small to be CTF");
@@ -463,7 +470,7 @@ ctf_dump_type(struct ctf_header *cth, const char *data, off_t dlen,
 		break;
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:
-		printf(" (%llu bytes)\n", size);
+		printf(" (%lu bytes)\n", size);
 
 		if (size < CTF_LSTRUCT_THRESH) {
 			for (i = 0; i < vlen; i++) {
@@ -622,7 +629,7 @@ exit:
 	return NULL;
 }
 
-__dead void
+__dead2 void
 usage(void)
 {
 	fprintf(stderr, "usage: %s [-dfhlst] file ...\n",
