@@ -76,7 +76,7 @@ ssize_t		 elf_getsymtab(const char *, const char *, size_t,
 ssize_t		 elf_getsection(char *, const char *, const char *,
 		     size_t, const char **, size_t *);
 
-char		*decompress(const char *, size_t, off_t);
+char		*decompress(const char *, size_t, size_t);
 
 int
 main(int argc, char *argv[])
@@ -491,7 +491,7 @@ ctf_dump_type(struct ctf_header *cth, const char *data, off_t dlen,
 				ctlm = (struct ctf_lmember *)(p + toff);
 				toff += sizeof(struct ctf_lmember);
 
-				printf("\t%s type=%u off=%llu\n",
+				printf("\t%s type=%u off=%zu\n",
 				    ctf_off2name(cth, data, dlen,
 					ctlm->ctlm_name),
 				    ctlm->ctlm_type, CTF_LMEM_OFFSET(ctlm));
@@ -580,7 +580,7 @@ ctf_off2name(struct ctf_header *cth, const char *data, off_t dlen,
 }
 
 char *
-decompress(const char *buf, size_t size, off_t len)
+decompress(const char *buf, size_t size, size_t len)
 {
 #ifdef ZLIB
 	z_stream		 stream;
@@ -616,7 +616,7 @@ decompress(const char *buf, size_t size, off_t len)
 	}
 
 	if (stream.total_out != len) {
-		warnx("decompression failed: %llu != %llu",
+		warnx("decompression failed: %zu != %zu",
 		    stream.total_out, len);
 		goto exit;
 	}
